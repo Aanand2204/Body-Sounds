@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "body-sound-detection"
-version = "0.4.4"
+version = "0.4.5"
 description = "AI-powered body sound analysis platform for heart, lung, and bowel sound detection."
 readme = "README.md"
 requires-python = ">=3.9"

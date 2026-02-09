@@ -4,7 +4,7 @@ description: How to build and upload the package to PyPI
 
 # PyPI Deployment Guide
 
-Follow these steps to build and publish your `heart-murmur-analysis` package to PyPI.
+Follow these steps to build and publish your `body-sound-detection` package to PyPI.
 
 ### 1. Preparation
 Ensure your `pyproject.toml` has the correct version. Every time you upload to PyPI, you **must** increment the version (e.g., from `0.4.1` to `0.4.2`).
