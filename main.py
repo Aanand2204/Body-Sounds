@@ -13,16 +13,16 @@ import nest_asyncio
 nest_asyncio.apply()
 
 # Import utilities
-from combined.utils import pretty_print_analysis, export_json
+from heart_murmur_analysis.utils import pretty_print_analysis, export_json
 
 # Import classification modules
-from combined.classification import load_heart_model, load_lung_model, load_bowel_model, HeartSoundClassifier, LungSoundClassifier, BowelSoundClassifier
+from heart_murmur_analysis.classification import load_heart_model, load_lung_model, load_bowel_model, HeartSoundClassifier, LungSoundClassifier, BowelSoundClassifier
 
 # Import signal processing modules
-from combined.signal_processing import HeartbeatAnalyzer, LungSoundAnalyzer, BowelSoundAnalyzer
+from heart_murmur_analysis.signal_processing import HeartbeatAnalyzer, LungSoundAnalyzer, BowelSoundAnalyzer
 
 # Import report generators
-from combined.report_generator.report_generator import (
+from heart_murmur_analysis.report_generator.report_generator import (
     generate_heart_report, 
     generate_lung_report,
     generate_hospital_report
@@ -30,7 +30,7 @@ from combined.report_generator.report_generator import (
 
 # Agent imports
 try:
-    from combined.agent.agent import build_heartbeat_agent, build_bowel_agent, build_lung_agent
+    from heart_murmur_analysis.agent.agent import build_heartbeat_agent, build_bowel_agent, build_lung_agent
 except ImportError:
     # Agent modules may not exist yet
     build_heartbeat_agent = None
@@ -167,7 +167,7 @@ def run_bowel_signal_processing(uploaded_file, results_dict):
 
     # Show plots using cached results
     data = sp_results["_data"]
-    from combined.signal_processing.visualizer import plot_results
+    from heart_murmur_analysis.signal_processing.visualizer import plot_results
     plot_results(
         time=data["time"],
         raw=data["raw"],
@@ -278,7 +278,7 @@ def run_heart_signal_processing(uploaded_file, results_dict):
 
     # Show plots
     data = sp_results["_data"]
-    from combined.signal_processing.visualizer import plot_results
+    from heart_murmur_analysis.signal_processing.visualizer import plot_results
     plot_results(
         time=data["time"],
         raw=data["raw"],

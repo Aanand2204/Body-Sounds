@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "heart-murmur-analysis"
+version = "0.4.3"
+description = "Heartbeat analysis using Deep Learning, Signal Processing, and AI Agents."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Aanand", email = "aanan@example.com"}
+]
+dependencies = [
+    "streamlit",
+    "python-docx",
+    "numpy<2.0,>=1.26.0",
+    "pandas",
+    "matplotlib",
+    "scikit-learn",
+    "tensorflow>=2.16.1",
+    "tf-keras",
+    "librosa>=0.11.0",
+    "numba>=0.58.0",
+    "soundfile",
+    "python-dotenv",
+    "pydantic",
+    "langchain-groq",
+    "langchain",
+    "langchain-community",
+    "langchain_google_genai",
+    "langchain-text-splitters",
+    "chromadb",
+    "faiss-cpu",
+    "openpyxl",
+    "langchain-core",
+    "langchain-huggingface",
+    "langgraph",
+    "sentence-transformers",
+    "nest-asyncio",
+    "huggingface-hub",
+    "llvmlite>=0.41.0"
+]
+
+[project.scripts]
+heart-murmur-app = "heart_murmur_analysis.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["heart_murmur_analysis"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "heart_murmur_analysis",
+    "README.md",
+]
+
+[tool.hatch.build]
+artifacts = [
+    "heart_murmur_analysis/models/*.h5"
+]
