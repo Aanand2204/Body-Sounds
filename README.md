@@ -50,13 +50,7 @@ pip install -e .
 
 ## 🏃 Usage
 
-### 1. Launch the Main Dashboard
-Use the built-in CLI command to start the Streamlit interface:
-```powershell
-heart-murmur-app
-```
-
-### 2. Programmatic Usage
+### Programmatic Usage
 You can use the package as a library in your own Python projects:
 ```python
 from heart_murmur_analysis import HeartbeatAnalyzer, load_model
