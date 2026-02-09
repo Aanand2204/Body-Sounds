@@ -3,7 +3,7 @@ from tensorflow.keras.layers import LSTM as OriginalLSTM
 from tensorflow.keras.layers import GRU as OriginalGRU
 from tensorflow.keras import layers, models
 from huggingface_hub import hf_hub_download
-from heart_murmur_analysis.config import (
+from body_sound_detection.config import (
     HF_HEART_REPO_ID, HF_HEART_MODEL_FILENAME,
     HF_LUNG_REPO_ID, HF_LUNG_MODEL_FILENAME,
     HF_BOWEL_REPO_ID, HF_BOWEL_MODEL_FILENAME

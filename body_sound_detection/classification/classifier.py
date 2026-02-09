@@ -1,6 +1,6 @@
 import numpy as np
 import librosa
-from heart_murmur_analysis.config import SAMPLE_RATE, N_MFCC, CLASSES
+from body_sound_detection.config import SAMPLE_RATE, N_MFCC, CLASSES
 
 
 class HeartSoundClassifier:

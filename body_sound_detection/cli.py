@@ -3,10 +3,10 @@ import subprocess
 import sys
 
 def main():
-    """Launch the heart murmur analysis Streamlit app."""
+    """Launch the body sound detection Streamlit app."""
     # Get the directory of this file
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    # The main.py is in the parent directory of this file (assuming heart_murmur_analysis/cli.py)
+    # The main.py is in the parent directory of this file (assuming body_sound_detection/cli.py)
     # Wait, the main.py is in d:\Body-Sound-Detection1-main\main.py
     # So if this file is heart_murmur_analysis/cli.py, main.py is one level up.
     
@@ -18,7 +18,7 @@ def main():
         print(f"Error: Could not find main.py at {main_py_path}")
         sys.exit(1)
         
-    print(f"Starting Heart Murmur Analysis App from {main_py_path}...")
+    print(f"Starting Body Sound Detection App from {main_py_path}...")
     
     try:
         # Run streamlit as a module

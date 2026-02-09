@@ -35,7 +35,7 @@ Install the package directly from PyPI or locally in editable mode:
 
 ### From PyPI
 ```powershell
-pip install heart-murmur-analysis
+pip install body-sound-detection
 ```
 
 ### Locally (for development)
@@ -53,7 +53,7 @@ pip install -e .
 ### Programmatic Usage
 You can use the package as a library in your own Python projects:
 ```python
-from heart_murmur_analysis import HeartbeatAnalyzer, load_model
+from body_sound_detection import HeartbeatAnalyzer, load_model
 
 # Run Signal Processing
 analyzer = HeartbeatAnalyzer("heartbeat_sample.wav")
@@ -74,7 +74,7 @@ The AI Agents require the following environment variables (or a `.env` file):
 ## 📂 Project Structure
 
 ```text
-├── heart_murmur_analysis/ 
+├── body_sound_detection/ 
 │   ├── agent/             # LangGraph AI logic
 │   ├── classification/    # Deep Learning (H5 Models)
 │   ├── signal_processing/ # Audio DSP routines

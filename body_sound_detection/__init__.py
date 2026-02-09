@@ -1,4 +1,4 @@
-# heart_murmur_analysis/__init__.py
+# body_sound_detection/__init__.py
 
 from .signal_processing import HeartbeatAnalyzer, LungSoundAnalyzer, BowelSoundAnalyzer
 from .classification import (

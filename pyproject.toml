@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "heart-murmur-analysis"
+name = "body-sound-detection"
 version = "0.4.4"
-description = "Heartbeat analysis using Deep Learning, Signal Processing, and AI Agents."
+description = "AI-powered body sound analysis platform for heart, lung, and bowel sound detection."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -44,18 +44,18 @@ dependencies = [
 ]
 
 [project.scripts]
-heart-murmur-app = "heart_murmur_analysis.cli:main"
+body-sound-app = "body_sound_detection.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["heart_murmur_analysis"]
+packages = ["body_sound_detection"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "heart_murmur_analysis",
+    "body_sound_detection",
     "README.md",
 ]
 
 [tool.hatch.build]
 artifacts = [
-    "heart_murmur_analysis/models/*.h5"
+    "body_sound_detection/models/*.h5"
 ]
