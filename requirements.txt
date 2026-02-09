@@ -1,0 +1,47 @@
+huggingface-hub    
+python-docx
+# ui
+streamlit
+nest-asyncio
+
+
+# Basic DS  
+numpy>=1.26.0,<2.0.0
+pandas
+matplotlib
+
+
+# model loading
+scikit-learn
+tensorflow>=2.16.1
+tf-keras
+
+
+# sound processing
+librosa>=0.11.0
+numba>=0.58.0
+llvmlite>=0.41.0
+soundfile
+
+
+# autogen
+autogen-agentchat==0.5.7
+autogen-ext[openai]
+python-dotenv
+autogen-core
+pydantic
+autogen-ext[ollama]
+
+
+# langchain
+langchain
+langchain-community
+langchain_google_genai
+langchain-text-splitters
+chromadb
+faiss-cpu
+openpyxl
+langchain-huggingface
+sentence-transformers
+langchain-groq
+langgraph

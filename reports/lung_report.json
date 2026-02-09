@@ -1,0 +1,20 @@
+{
+    "classification": "Bronchiolitis",
+    "confidence": 0.9991169571876526,
+    "file": "C:\\Users\\hp\\AppData\\Local\\Temp\\tmprtv7fqx5.wav",
+    "fs": 4000,
+    "duration_s": 20.0,
+    "breaths_detected": 19,
+    "breathing_rate": 55.97667638483964,
+    "SNR_dB": 21.854728118753258,
+    "spectral": {
+        "low_band_energy_%": 58.66297338684741,
+        "mid_band_energy_%": 0.006205364626182736,
+        "high_band_energy_%": 7.704104559848231e-16,
+        "spectral_centroid_hz": 83.71427409298992
+    },
+    "adventitious": {
+        "wheeze_index_%": 0.006205364626182736,
+        "crackle_index_%": 49.87058308986638
+    }
+}

@@ -1,0 +1,415 @@
+import json
+from datetime import datetime
+from io import BytesIO
+
+import streamlit as st
+from docx import Document
+from docx.shared import Pt, RGBColor
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+
+# ===========================
+# HEART SOUND REPORT
+# ===========================
+
+def create_heart_docx_report(data, patient_info=None):
+    """
+    Create a DOCX report from heart sound JSON data and patient info.
+    """
+    if patient_info is None:
+        patient_info = {"name": "Demo Patient", "age": 45, "gender": "Male"}
+    
+    patient_name = patient_info.get("name", "Unknown")
+    patient_age = patient_info.get("age", "Unknown")
+    patient_gender = patient_info.get("gender", "Unknown")
+    
+    classification = data.get("classification", "Unknown")
+    duration = data.get("duration_s", 0)
+    beats = data.get("beats_detected", 0)
+    bpm = data.get("bpm", 0)
+    snr = data.get("SNR_dB", 0)
+    
+    hrv = data.get("hrv", {})
+    energy = data.get("energy", {})
+    s1s2 = data.get("S1S2", {})
+    extra_peaks = data.get("extra_peaks", {})
+    band_energy = data.get("150_500Hz_band", {})
+    
+    doc = Document()
+    
+    # Title
+    title = doc.add_heading('Heart Sound Analysis Report', 0)
+    title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # Patient Info
+    p = doc.add_paragraph()
+    p.add_run(f"Patient: {patient_name}   |   Age: {patient_age}   |   Gender: {patient_gender}").bold = True
+    doc.add_paragraph(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    doc.add_paragraph("-" * 40)
+    
+    # Summary Info
+    doc.add_heading("Summary", level=1)
+    summary_table = doc.add_table(rows=4, cols=2)
+    summary_table.style = 'LightShading-Accent1'
+    summary_table.cell(0, 0).text = "Recording Duration (s)"
+    summary_table.cell(0, 1).text = f"{duration:.2f}"
+    summary_table.cell(1, 0).text = "Beats Detected"
+    summary_table.cell(1, 1).text = f"{beats}"
+    summary_table.cell(2, 0).text = "Average HR (bpm)"
+    summary_table.cell(2, 1).text = f"{bpm:.1f}"
+    summary_table.cell(3, 0).text = "Signal-to-Noise Ratio (SNR dB)"
+    summary_table.cell(3, 1).text = f"{snr:.2f}"
+    
+    # Classification
+    doc.add_heading("Classification Result", level=1)
+    run = doc.add_paragraph().add_run(f"{classification}")
+    if classification == "Normal":
+        run.bold = True
+    elif classification == "Murmur":
+        run.bold = True
+        run.font.color.rgb = RGBColor(255, 0, 0)
+    
+    # HRV Table
+    doc.add_heading("Heart Rate Variability (HRV)", level=2)
+    hrv_table = doc.add_table(rows=4, cols=2)
+    hrv_table.style = 'LightShading-Accent2'
+    hrv_table.cell(0, 0).text = "Mean IBI (ms)"
+    hrv_table.cell(0, 1).text = f"{hrv.get('mean_IBI_ms', 0):.1f}"
+    hrv_table.cell(1, 0).text = "SDNN (ms)"
+    hrv_table.cell(1, 1).text = f"{hrv.get('SDNN_ms', 0):.2f}"
+    hrv_table.cell(2, 0).text = "RMSSD (ms)"
+    hrv_table.cell(2, 1).text = f"{hrv.get('RMSSD_ms', 0):.2f}"
+    hrv_table.cell(3, 0).text = "pNN50 (%)"
+    hrv_table.cell(3, 1).text = f"{hrv.get('pNN50_pct', 0):.2f}"
+    
+    # Valve Sounds Table
+    doc.add_heading("Valve Sounds (S1 / S2)", level=2)
+    valve_table = doc.add_table(rows=3, cols=2)
+    valve_table.style = 'LightShading-Accent3'
+    valve_table.cell(0, 0).text = "S1 Mean"
+    valve_table.cell(0, 1).text = f"{s1s2.get('S1_mean', 0):.3f}"
+    valve_table.cell(1, 0).text = "S2 Mean"
+    valve_table.cell(1, 1).text = f"{s1s2.get('S2_mean', 0):.3f}"
+    valve_table.cell(2, 0).text = "S1/S2 Ratio"
+    valve_table.cell(2, 1).text = f"{s1s2.get('S1_to_S2_ratio', 0):.2f}"
+    
+    # Spectral Analysis Table
+    doc.add_heading("Spectral / Frequency Analysis", level=2)
+    spectral_table = doc.add_table(rows=3, cols=2)
+    spectral_table.style = 'LightShading-Accent4'
+    spectral_table.cell(0, 0).text = "Energy <200 Hz (%)"
+    spectral_table.cell(0, 1).text = f"{energy.get('pct_energy_below_200Hz', 0):.2f}"
+    spectral_table.cell(1, 0).text = "150–500 Hz Band Energy (%)"
+    spectral_table.cell(1, 1).text = f"{band_energy.get('band_energy_pct', 0):.2f}"
+    spectral_table.cell(2, 0).text = "Spectral Centroid (Hz)"
+    spectral_table.cell(2, 1).text = f"{energy.get('spectral_centroid_hz', 0):.2f}"
+    
+    # Extra Peaks
+    doc.add_heading("Extra Peaks / Irregularities", level=2)
+    doc.add_paragraph(f"Cycles with Extra Peaks: {extra_peaks.get('cycles_with_extra_peaks', 0)}")
+    
+    # Impression
+    doc.add_heading("Clinical Impression", level=2)
+    if classification == "Normal":
+        doc.add_paragraph("Regular rhythm, adequate signal quality, no murmurs detected.")
+    elif classification == "Murmur":
+        doc.add_paragraph("Possible murmur detected. Recommend clinical follow-up.")
+    else:
+        doc.add_paragraph("Signal quality insufficient or inconclusive result.")
+    
+    doc.add_paragraph("-" * 40)
+    doc.add_paragraph("Disclaimer: This report is generated by AI analysis for demo purposes only. Not intended for clinical diagnosis.")
+    
+    # Save to in-memory file
+    file_stream = BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    return file_stream
+
+
+def generate_heart_report(report_path: str, patient_info=None):
+    """
+    Display heart sound report in Streamlit and provide DOCX download.
+    """
+    with open(report_path, "r") as f:
+        data = json.load(f)
+    
+    classification = data.get("classification", "Unknown")
+    duration = data.get("duration_s", 0)
+    beats = data.get("beats_detected", 0)
+    bpm = data.get("bpm", 0)
+    snr = data.get("SNR_dB", 0)
+    hrv = data.get("hrv", {})
+    energy = data.get("energy", {})
+    s1s2 = data.get("S1S2", {})
+    extra_peaks = data.get("extra_peaks", {})
+    band_energy = data.get("150_500Hz_band", {})
+    
+    if patient_info is None:
+        patient_info = {"name": "Demo Patient", "age": 45, "gender": "Male"}
+    
+    patient_name = patient_info.get("name", "Unknown")
+    patient_age = patient_info.get("age", "Unknown")
+    patient_gender = patient_info.get("gender", "Unknown")
+    
+    # Streamlit Display
+    st.markdown("## ❤️ Heart Sound Analysis Report")
+    st.markdown(f"**Patient:** {patient_name}   |   **Age:** {patient_age}   |   **Gender:** {patient_gender}")
+    st.markdown(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.markdown("---")
+    
+    st.markdown(f"**Recording Duration:** {duration:.2f} s  \n"
+                f"**Beats Detected:** {beats}  \n"
+                f"**Average HR:** {bpm:.1f} bpm  \n"
+                f"**Signal-to-Noise Ratio (SNR):** {snr:.2f} dB")
+    
+    st.markdown(f"### Classification Result\n- Category: **{classification}**")
+    
+    st.markdown("### Heart Rate Variability (HRV)")
+    st.markdown(f"- Mean IBI: {hrv.get('mean_IBI_ms', 0):.1f} ms  \n"
+                f"- SDNN: {hrv.get('SDNN_ms', 0):.2f} ms  \n"
+                f"- RMSSD: {hrv.get('RMSSD_ms', 0):.2f} ms  \n"
+                f"- pNN50: {hrv.get('pNN50_pct', 0):.2f} %")
+    
+    st.markdown("### Valve Sounds (S1 / S2)")
+    st.markdown(f"- S1 Mean: {s1s2.get('S1_mean', 0):.3f}  \n"
+                f"- S2 Mean: {s1s2.get('S2_mean', 0):.3f}  \n"
+                f"- S1/S2 Ratio: {s1s2.get('S1_to_S2_ratio', 0):.2f}")
+    
+    st.markdown("### Spectral / Frequency Analysis")
+    st.markdown(f"- Energy <200 Hz: {energy.get('pct_energy_below_200Hz', 0):.2f} %  \n"
+                f"- 150–500 Hz Band Energy: {band_energy.get('band_energy_pct', 0):.2f} %  \n"
+                f"- Spectral Centroid: {energy.get('spectral_centroid_hz', 0):.2f} Hz")
+    
+    st.markdown("### Extra Peaks / Irregularities")
+    st.markdown(f"- Cycles with Extra Peaks: {extra_peaks.get('cycles_with_extra_peaks', 0)}")
+    
+    st.markdown("### Clinical Impression")
+    if classification == "Normal":
+        st.markdown("Regular rhythm, adequate signal quality, no murmurs detected.")
+    elif classification == "Murmur":
+        st.markdown("Possible murmur detected. Recommend clinical follow-up.")
+    else:
+        st.markdown("Signal quality insufficient or inconclusive result.")
+    
+    st.markdown("---")
+    st.markdown("_Disclaimer: This report is generated by AI analysis for demo purposes only. Not intended for clinical diagnosis._")
+    
+    # Download Button
+    st.download_button(
+        label="📄 Download Heart Report (DOCX)",
+        data=create_heart_docx_report(data, patient_info),
+        file_name="heart_sound_report.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+
+# ===========================
+# LUNG SOUND REPORT
+# ===========================
+
+def create_lung_docx_report(report: dict, patient_info: dict):
+    """
+    Create a DOCX report for lung sound analysis.
+    """
+    if patient_info is None:
+        patient_info = {"name": "Demo Patient", "age": 45, "gender": "Male"}
+    
+    doc = Document()
+
+    # Title
+    title = doc.add_heading("Lung Sound Analysis Report", 0)
+    title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Patient Info
+    doc.add_paragraph(
+        f"Patient: {patient_info['name']} | "
+        f"Age: {patient_info['age']} | "
+        f"Gender: {patient_info['gender']}"
+    ).bold = True
+
+    doc.add_paragraph(
+        f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    doc.add_paragraph("-" * 40)
+
+    # Classification
+    doc.add_heading("Predicted Disease", level=1)
+    pred = report.get("classification", "Unknown")
+    confidence = report.get("confidence", 0)
+    
+    para = doc.add_paragraph()
+    run = para.add_run(f"{pred}")
+    run.bold = True
+    if pred.lower() != "healthy":
+        run.font.color.rgb = RGBColor(255, 0, 0)
+    
+    para.add_run(f"\nConfidence: {confidence*100:.2f}%")
+
+    # Summary
+    doc.add_heading("Summary", level=1)
+    table = doc.add_table(rows=5, cols=2)
+    table.style = "LightShading-Accent1"
+
+    table.cell(0, 0).text = "Recording Duration (s)"
+    table.cell(0, 1).text = f"{report.get('duration_s', 0):.2f}"
+
+    table.cell(1, 0).text = "Breaths Detected"
+    table.cell(1, 1).text = str(report.get("breaths_detected", "N/A"))
+
+    br = report.get("breathing_rate")
+    table.cell(2, 0).text = "Estimated Breathing Rate (breaths/min)"
+    table.cell(2, 1).text = f"{br:.1f}" if br else "N/A"
+
+    table.cell(3, 0).text = "Signal-to-Noise Ratio (dB)"
+    table.cell(3, 1).text = f"{report.get('SNR_dB', 0):.2f}"
+
+    table.cell(4, 0).text = "Sampling Frequency (Hz)"
+    table.cell(4, 1).text = str(report.get("fs", "N/A"))
+
+    # Spectral
+    doc.add_heading("Spectral Energy Distribution", level=1)
+    spec = report.get("spectral", {})
+
+    spec_table = doc.add_table(rows=4, cols=2)
+    spec_table.style = "LightShading-Accent2"
+
+    spec_table.cell(0, 0).text = "Low Band Energy (50–400 Hz)"
+    spec_table.cell(0, 1).text = f"{spec.get('low_band_energy_%', 0):.2f} %"
+
+    spec_table.cell(1, 0).text = "Mid Band Energy (400–1600 Hz)"
+    spec_table.cell(1, 1).text = f"{spec.get('mid_band_energy_%', 0):.2f} %"
+
+    spec_table.cell(2, 0).text = "High Band Energy (1600–2500 Hz)"
+    spec_table.cell(2, 1).text = f"{spec.get('high_band_energy_%', 0):.2f} %"
+
+    spec_table.cell(3, 0).text = "Spectral Centroid (Hz)"
+    spec_table.cell(3, 1).text = f"{spec.get('spectral_centroid_hz', 0):.2f}"
+
+    # Adventitious
+    doc.add_heading("Adventitious Sound Indices", level=1)
+    adv = report.get("adventitious", {})
+
+    adv_table = doc.add_table(rows=2, cols=2)
+    adv_table.style = "LightShading-Accent3"
+
+    adv_table.cell(0, 0).text = "Wheeze Index (%)"
+    adv_table.cell(0, 1).text = f"{adv.get('wheeze_index_%', 0):.2f}"
+
+    adv_table.cell(1, 0).text = "Crackle Index (%)"
+    adv_table.cell(1, 1).text = f"{adv.get('crackle_index_%', 0):.2f}"
+
+    # Impression
+    doc.add_heading("Clinical Impression", level=1)
+    
+    # More detailed impression based on the actual data
+    wheeze_idx = adv.get('wheeze_index_%', 0)
+    crackle_idx = adv.get('crackle_index_%', 0)
+    
+    if pred.lower() == "healthy":
+        doc.add_paragraph(
+            "Breathing sounds appear within normal limits. "
+            "No dominant wheeze or crackle patterns detected."
+        )
+    else:
+        impression_text = f"Abnormal respiratory patterns detected consistent with {pred}. "
+        
+        if crackle_idx > 50:
+            impression_text += f"Significant crackle index ({crackle_idx:.1f}%) suggests possible inflammatory or fibrotic changes. "
+        
+        if wheeze_idx > 1:
+            impression_text += f"Elevated wheeze index ({wheeze_idx:.2f}%) may indicate bronchial constriction. "
+        
+        impression_text += "Clinical correlation and further diagnostic workup are recommended."
+        doc.add_paragraph(impression_text)
+
+    doc.add_paragraph("-" * 40)
+    doc.add_paragraph(
+        "Disclaimer: This report is generated using AI-based signal analysis "
+        "and is intended for academic and research purposes only. Not intended for clinical diagnosis."
+    )
+
+    # Save
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+def generate_lung_report(report_path: str, patient_info: dict = None):
+    """
+    Display lung sound report in Streamlit and provide DOCX download.
+    """
+    with open(report_path, "r") as f:
+        report = json.load(f)
+
+    if patient_info is None:
+        patient_info = {"name": "Demo Patient", "age": 45, "gender": "Male"}
+
+    st.header("🫁 Lung Sound Analysis Report")
+
+    st.markdown(
+        f"**Patient:** {patient_info['name']} | "
+        f"**Age:** {patient_info['age']} | "
+        f"**Gender:** {patient_info['gender']}"
+    )
+
+    st.markdown(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.markdown("---")
+
+    # Prediction
+    st.subheader("Predicted Disease")
+    pred = report.get('classification', 'Unknown')
+    confidence = report.get('confidence', 0)
+    st.markdown(f"### 🩺 **{pred}**")
+    st.markdown(f"**Confidence:** {confidence*100:.2f}%")
+
+    # Summary
+    st.subheader("Summary")
+    st.markdown(
+        f"- **Duration:** {report.get('duration_s', 0):.2f} s  \n"
+        f"- **Breaths Detected:** {report.get('breaths_detected', 'N/A')}  \n"
+    )
+    
+    br = report.get("breathing_rate")
+    if br:
+        st.markdown(f"- **Breathing Rate:** {br:.1f} breaths/min")
+    else:
+        st.markdown("- **Breathing Rate:** N/A")
+
+    st.markdown(f"- **SNR:** {report.get('SNR_dB', 0):.2f} dB")
+
+    # Spectral
+    st.subheader("Spectral Analysis")
+    st.json(report.get("spectral", {}))
+
+    # Adventitious
+    st.subheader("Adventitious Sound Indices")
+    st.json(report.get("adventitious", {}))
+
+    # Clinical Impression
+    st.subheader("Clinical Impression")
+    wheeze_idx = report.get('adventitious', {}).get('wheeze_index_%', 0)
+    crackle_idx = report.get('adventitious', {}).get('crackle_index_%', 0)
+    
+    if pred.lower() == "healthy":
+        st.info("Breathing sounds appear within normal limits. No dominant wheeze or crackle patterns detected.")
+    else:
+        impression = f"Abnormal respiratory patterns detected consistent with **{pred}**. "
+        
+        if crackle_idx > 50:
+            impression += f"Significant crackle index ({crackle_idx:.1f}%) suggests possible inflammatory or fibrotic changes. "
+        
+        if wheeze_idx > 1:
+            impression += f"Elevated wheeze index ({wheeze_idx:.2f}%) may indicate bronchial constriction. "
+        
+        impression += "Clinical correlation and further diagnostic workup are recommended."
+        st.warning(impression)
+
+    # Download
+    st.download_button(
+        "📄 Download Lung Report (DOCX)",
+        data=create_lung_docx_report(report, patient_info),
+        file_name="lung_sound_report.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
